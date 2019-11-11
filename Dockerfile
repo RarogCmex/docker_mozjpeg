@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # https://github.com/mozilla/mozjpeg/releases
-ENV VERSION 3.1
+ENV VERSION 3.2
 
 RUN apk add --no-cache bash build-base nasm
 
