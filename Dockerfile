@@ -1,18 +1,23 @@
-FROM alpine:latest
-
 # https://github.com/mozilla/mozjpeg/releases
-ENV VERSION 3.2
+FROM alpine:latest AS builder
+ENV VERSION 3.3.1
 
-RUN apk add --no-cache bash build-base nasm
+WORKDIR /src/mozjpeg
+ADD https://github.com/mozilla/mozjpeg/archive/v${VERSION}.tar.gz ./
 
-RUN cd /var/opt \
- && wget https://github.com/mozilla/mozjpeg/releases/download/v${VERSION}/mozjpeg-${VERSION}-release-source.tar.gz \
- && tar -xzf mozjpeg-${VERSION}-release-source.tar.gz \
- && rm mozjpeg-${VERSION}-release-source.tar.gz \
- && cd mozjpeg \
- && ./configure \
- && make \
- && ln -s /var/opt/mozjpeg/cjpeg /usr/bin/cjpeg \
- && ln -s /var/opt/mozjpeg/djpeg /usr/bin/djpeg
+RUN apk add --no-cache build-base autoconf automake libtool pkgconf nasm tar \
+ && tar -xzf v${VERSION}.tar.gz \
+ && mv mozjpeg-${VERSION} src \
+ && cd src \
+ && autoreconf -fiv \
+ && cd .. \
+ && mkdir build \
+ && cd build \
+ && ../src/configure \
+ && make install prefix=/usr/local libdir=/usr/local/lib64
 
+# copy to target image
+FROM alpine:latest
+RUN apk add --no-cache bash
+COPY --from=builder /usr/local /usr/local
 ENTRYPOINT /bin/bash
