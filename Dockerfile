@@ -1,23 +1,21 @@
 # https://github.com/mozilla/mozjpeg/releases
-FROM alpine:latest AS builder
-ENV VERSION 3.3.1
+FROM ubuntu:latest AS builder
+ENV VERSION 4.0.0
 
 WORKDIR /src/mozjpeg
 ADD https://github.com/mozilla/mozjpeg/archive/v${VERSION}.tar.gz ./
 
-RUN apk add --no-cache build-base autoconf automake libtool pkgconf nasm tar \
- && tar -xzf v${VERSION}.tar.gz \
- && mv mozjpeg-${VERSION} src \
- && cd src \
- && autoreconf -fiv \
- && cd .. \
- && mkdir build \
- && cd build \
- && ../src/configure \
- && make install prefix=/usr/local libdir=/usr/local/lib64
+RUN apt-get update                                                             \
+ && apt-get dist-upgrade -y                                                    \
+ && apt-get install -y cmake nasm tar zlib1g-dev libpng-dev
+
+RUN tar -xzf v${VERSION}.tar.gz                                                \
+ && mv mozjpeg-${VERSION} src                                                  \
+ && mkdir build/                                                               \
+ && cd build/                                                                  \
+ && cmake -G"Unix Makefiles" ../src/                                           \
+ && make
 
 # copy to target image
-FROM alpine:latest
-RUN apk add --no-cache bash
-COPY --from=builder /usr/local /usr/local
-ENTRYPOINT /bin/bash
+FROM ubuntu:latest
+COPY --from=builder /src/mozjpeg/build/cjpeg-static /usr/local/bin/cjpeg
