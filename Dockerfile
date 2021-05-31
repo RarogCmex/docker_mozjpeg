@@ -1,6 +1,6 @@
 # https://github.com/mozilla/mozjpeg/releases
 FROM ubuntu:latest AS builder
-ENV VERSION 4.0.2
+ENV VERSION 4.0.3
 
 WORKDIR /src/mozjpeg
 ADD https://github.com/mozilla/mozjpeg/archive/v${VERSION}.tar.gz ./
