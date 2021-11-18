@@ -1,5 +1,5 @@
 # https://github.com/mozilla/mozjpeg/releases
-FROM ubuntu:latest AS builder
+FROM ubuntu:20.04 AS builder
 ENV VERSION 4.0.3
 
 WORKDIR /src/mozjpeg
@@ -17,5 +17,5 @@ RUN tar -xzf v${VERSION}.tar.gz                                                \
  && make
 
 # copy to target image
-FROM ubuntu:latest
+FROM ubuntu:20.04
 COPY --from=builder /src/mozjpeg/build/cjpeg-static /usr/local/bin/cjpeg
